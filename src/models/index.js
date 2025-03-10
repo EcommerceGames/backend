@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const db = {};
 db.mongoose = mongoose;
-db.auth = require("./auth.model");
+db.blogs = require("./blogs.model");
 db.user = require("./user.model");
 db.games = require("./games.model");
 

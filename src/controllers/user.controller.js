@@ -3,6 +3,7 @@ const db = require("../models/index");
 const User = db.user;
 const { MESSAGE } = require("../utils/constants");
 const jwt = require("jsonwebtoken");
+const { any } = require("../middleware/upload");
 let refreshTokens = [];
 //generateAccessToken
 exports.generateAccessToken = (user) => {
@@ -206,6 +207,170 @@ exports.logout = async (req, res) => {
     res.status(500).json({
       status: "ERR",
       message: "Logout failed",
+      error: error.message,
+    });
+  }
+};
+
+//ADDUSER
+exports.addUser = async (req, res) => {
+  try {
+    const { email, username, password, phone, address } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!email || !username || !password || !phone || !address) {
+      return res.status(400).json({
+        status: "ERR",
+        message: MESSAGE.THE_INPUT_IS_REQUIRED,
+      });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "User already exists",
+      });
+    }
+
+    const newUser = await User.create({
+      image: image,
+      email,
+      username,
+      password: hashPassword,
+      phone,
+      address,
+    });
+
+    res.status(200).json({
+      status: "OK",
+      message: "CreateUser successfully!",
+      data: newUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "CreateUser failed",
+      error: error.message,
+    });
+  }
+};
+
+//UPDATE
+exports.updateUser = async (req, res) => {
+  try {
+    const { username, password, phone, address } = req.body;
+    const user = await User.findById(req.params.id);
+    const image = req.file
+      ? `/uploads/${req.file.filename}`
+      : req.body.image || user.image;
+
+    const updateUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...user._doc,
+        username,
+        password: password ? await bcrypt.hash(password, 10) : user.password,
+        phone,
+        address: address,
+        image: image,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updateUser) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "OK",
+      message: "UpdateUser successfully!",
+      data: updateUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "UpdateUser failed",
+      error: error.message,
+    });
+  }
+};
+
+//DELETE
+exports.deleteUser = async (req, res) => {
+  try {
+    const deleteUser = await User.findByIdAndDelete(req.params.id);
+
+    if (!deleteUser) {
+      return res.status(404).json({
+        status: "ERR",
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      status: "OK",
+      message: "DeleteUser successfully",
+      data: deleteUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "DeleteUser failed",
+      error: error.message,
+    });
+  }
+};
+
+//GetUser
+exports.getUser = async (req, res) => {
+  try {
+    const getUser = await User.findById(req.params.id);
+
+    if (!getUser) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "OK",
+      message: "GetUser successfully!",
+      data: getUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "GetUser failed",
+      error: error.message,
+    });
+  }
+};
+
+//GetAllUser
+exports.getAllUser = async (req, res) => {
+  try {
+    const getAllUser = await User.find();
+
+    if (!getAllUser) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "OK",
+      message: "GetAllUser successfully!",
+      data: getAllUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "GetAllUser failed",
       error: error.message,
     });
   }

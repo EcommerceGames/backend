@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     image: { type: String, require: true },
     phone: { type: Number, require: true },
     address: { type: String, require: true },
+    isAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
