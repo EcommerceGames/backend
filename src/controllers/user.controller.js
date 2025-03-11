@@ -315,7 +315,7 @@ exports.deleteUser = async (req, res) => {
     }
     res.status(200).json({
       status: "OK",
-      message: "DeleteUser successfully",
+      message: "DeleteUser successfully!",
       data: deleteUser,
     });
   } catch (error) {
