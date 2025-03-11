@@ -6,6 +6,6 @@ const { verifyToken } = require("../middleware/authMiddleware");
 router.post("/createGames", verifyToken, GamesController.createGames);
 router.put("/updateGames/:id", verifyToken, GamesController.updateGames);
 router.delete("/deleteGames/:id", verifyToken, GamesController.deleteGames);
-router.get("/getGame/:id", verifyToken, GamesController.getGames);
+router.get("/getGame/:id", GamesController.getGames);
 router.get("/getAllGames", GamesController.getAllGames);
 module.exports = router;
