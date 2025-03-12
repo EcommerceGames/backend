@@ -3,7 +3,7 @@ const db = require("../models/index");
 const User = db.user;
 const { MESSAGE } = require("../utils/constants");
 const jwt = require("jsonwebtoken");
-const { any } = require("../middleware/upload");
+
 let refreshTokens = [];
 //generateAccessToken
 exports.generateAccessToken = (user) => {
@@ -257,37 +257,41 @@ exports.addUser = async (req, res) => {
   }
 };
 
-//UPDATE
+// UPDATE
 exports.updateUser = async (req, res) => {
   try {
     const { username, password, phone, address } = req.body;
     const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ status: "ERR", message: "User not found" });
+    }
+
     const image = req.file
       ? `/uploads/${req.file.filename}`
       : req.body.image || user.image;
 
+    const updatedData = {
+      username: username || user.username,
+      phone: phone || user.phone,
+      address: address || user.address,
+      image: image,
+    };
+
+    if (password && password !== user.password) {
+      updatedData.password = await bcrypt.hash(password, 10);
+    } else {
+      updatedData.password = user.password;
+    }
+
     const updateUser = await User.findByIdAndUpdate(
       req.params.id,
-      {
-        ...user._doc,
-        username,
-        password: password ? await bcrypt.hash(password, 10) : user.password,
-        phone,
-        address: address,
-        image: image,
-      },
+      updatedData,
       {
         new: true,
         runValidators: true,
       }
     );
-
-    if (!updateUser) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "User not found",
-      });
-    }
 
     res.status(200).json({
       status: "OK",
