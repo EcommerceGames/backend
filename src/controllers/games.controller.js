@@ -5,9 +5,9 @@ const { MESSAGE } = require("../utils/constants");
 //CreateGames
 exports.createGames = async (req, res) => {
   try {
-    const { name, price, image, rate, type } = req.body;
-
-    if (!name || !price || !image || !rate || !type) {
+    const { name, price, rate, type } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!name || !price || !rate || !type) {
       return res.status(400).json({
         status: "ERR",
         message: MESSAGE.REQUEST_BODY_IS_MISSING,
@@ -24,7 +24,7 @@ exports.createGames = async (req, res) => {
     }
     const newGame = await Games.create({
       name,
-      image,
+      image: image,
       rate,
       price,
       type,
