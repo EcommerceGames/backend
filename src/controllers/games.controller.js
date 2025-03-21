@@ -34,7 +34,7 @@ exports.createGames = async (req, res) => {
 
     res.status(200).json({
       status: "OK",
-      message: "CreateGames successfully!s",
+      message: "CreateGames successfully!",
       data: newGame,
     });
   } catch (error) {
