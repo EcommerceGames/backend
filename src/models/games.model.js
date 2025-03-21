@@ -6,8 +6,9 @@ const gameSchema = new mongoose.Schema(
     price: { type: String, require: true },
     genre: { type: String, require: true },
     rating: { type: String, require: true },
-    image: { type: String, require: true },
+    image: [{ type: String, require: true }],
     video: { type: String, require: true },
+    content: { type: String, require: true },
   },
   {
     timestamps: true,

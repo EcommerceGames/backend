@@ -5,16 +5,16 @@ const { MESSAGE } = require("../utils/constants");
 //CreateGames
 exports.createGames = async (req, res) => {
   try {
-    const { name, price, rate, type } = req.body;
+    const { title, price, rating, genre, video, content } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
-    if (!name || !price || !rate || !type) {
+    if (!title || !price || !rating || !genre || !video || !content) {
       return res.status(400).json({
         status: "ERR",
         message: MESSAGE.REQUEST_BODY_IS_MISSING,
       });
     }
 
-    const existingGame = await Games.findOne({ name, image });
+    const existingGame = await Games.findOne({ title, image });
 
     if (existingGame) {
       return res.status(400).json({
@@ -23,11 +23,13 @@ exports.createGames = async (req, res) => {
       });
     }
     const newGame = await Games.create({
-      name,
+      title,
       image: image,
-      rate,
+      rating,
       price,
-      type,
+      genre,
+      video,
+      content,
     });
 
     res.status(200).json({
@@ -46,7 +48,7 @@ exports.createGames = async (req, res) => {
 //UpdateGames
 exports.updateGames = async (req, res) => {
   try {
-    const { name, price, rate, type } = req.body;
+    const { title, price, rating, genre, video, content } = req.body;
     const game = await Games.findById(req.params.id);
     const image = req.file
       ? `/uploads/${req.file.filename}`
@@ -56,11 +58,13 @@ exports.updateGames = async (req, res) => {
       req.params.id,
       {
         ...game._doc,
-        name,
+        title,
         price,
-        rate,
-        type,
+        rating,
+        genre,
         image: image,
+        video,
+        content,
       },
       {
         new: true,
