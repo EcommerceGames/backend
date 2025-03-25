@@ -4,10 +4,10 @@ const WishListController = require("../controllers/wishlist.controller");
 const { verifyToken } = require("../middleware/authMiddleware");
 
 //wishlist
-router.post("/createWishList", verifyToken, WishListController.createWishList);
+router.post("/createWishList", WishListController.createWishList);
 router.delete(
-  "/deleteWishList",
-  verifyToken,
+  "/deleteWishList/:id",
+
   WishListController.deleteWishList
 );
 router.get("/getWishList/:id", WishListController.getWishList);
