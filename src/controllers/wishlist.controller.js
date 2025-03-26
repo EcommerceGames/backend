@@ -44,8 +44,10 @@ exports.createWishList = async (req, res) => {
 exports.getWishList = async (req, res) => {
   try {
     const { user_id } = req.params;
+    // console.log("user_id từ request:", user_id);
     const wishlist = await WishList.find({ user_id }).populate("game_id");
-    if (!wishlist) {
+
+    if (wishlist.length === 0) {
       return res.status(400).json({
         status: "ERR",
         message: "WishList not found",
