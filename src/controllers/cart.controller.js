@@ -2,7 +2,7 @@ const db = require("../models/index");
 const Cart = db.cart;
 const { MESSAGE } = require("../utils/constants");
 
-//CreateGames
+//CreateCart
 exports.createCart = async (req, res) => {
   try {
     const { user_id, game_id, quantity } = req.body;
