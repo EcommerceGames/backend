@@ -2,32 +2,46 @@ const db = require("../models/index");
 const Cart = db.cart;
 const { MESSAGE } = require("../utils/constants");
 
-//CreateCart
+// CreateCart
+
 exports.createCart = async (req, res) => {
   try {
-    const { user_id, game_id, quantity } = req.body;
+    const { user_id, game_id } = req.body;
 
-    if (!user_id || !game_id || !quantity) {
+    if (!user_id || !game_id) {
       return res.status(400).json({
         status: "ERR",
-        message: MESSAGE.THE_INPUT_IS_REQUIRED,
+        message: "User ID and Game ID are required!",
       });
     }
 
-    let existingCart = await Cart.findOne({ user_id, game_id });
+    let cart = await Cart.findOne({ user_id });
 
-    if (existingCart) {
-      existingCart.quantity += quantity;
-      await existingCart.save();
+    if (cart) {
+      let itemIndex = cart.items.findIndex(
+        (item) => item.game_id.toString() === game_id
+      );
+
+      if (itemIndex > -1) {
+        cart.items[itemIndex].quantity += 1;
+      } else {
+        cart.items.push({ game_id, quantity: 1 });
+      }
+
+      await cart.save();
     } else {
-      existingCart = new Cart({ user_id, game_id, quantity });
-      await existingCart.save();
+      cart = new Cart({
+        user_id,
+        items: [{ game_id, quantity: 1 }],
+      });
+
+      await cart.save();
     }
 
     res.status(200).json({
       status: "OK",
-      message: "CreateCart successfully!",
-      data: existingCart,
+      message: "Added to cart successfully!",
+      data: cart,
     });
   } catch (error) {
     return res.status(500).json({
@@ -36,6 +50,7 @@ exports.createCart = async (req, res) => {
     });
   }
 };
+
 //getCart theo idUser
 exports.getCart = async (req, res) => {
   try {
