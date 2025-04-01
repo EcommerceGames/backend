@@ -3,7 +3,6 @@ const Cart = db.cart;
 const { MESSAGE } = require("../utils/constants");
 
 // CreateCart
-
 exports.createCart = async (req, res) => {
   try {
     const { user_id, game_id } = req.body;
@@ -51,14 +50,14 @@ exports.createCart = async (req, res) => {
   }
 };
 
-//getCart theo idUser
+// Get Cart theo user_id
 exports.getCart = async (req, res) => {
   try {
     const { user_id } = req.params;
 
-    const cartItems = await Cart.find({ user_id }).populate("game_id");
-
-    if (!cartItems) {
+    let cart = await Cart.findOne({ user_id }).populate("items.game_id");
+    console.log("cart", cart);
+    if (!cart) {
       return res.status(400).json({
         status: "ERR",
         message: "Cart not found",
@@ -68,7 +67,7 @@ exports.getCart = async (req, res) => {
     res.status(200).json({
       status: "OK",
       message: "GetCart successfully!",
-      data: cartItems,
+      data: cart,
     });
   } catch (error) {
     return res.status(500).json({
@@ -77,26 +76,39 @@ exports.getCart = async (req, res) => {
     });
   }
 };
-//deleteCart
+//delete cart
 exports.deleteCart = async (req, res) => {
   try {
-    const deleteCart = await Cart.findByIdAndDelete(req.params.id);
+    const { user_id, game_id } = req.body;
 
-    if (!deleteCart) {
+    if (!user_id || !game_id) {
       return res.status(400).json({
         status: "ERR",
-        message: "Cart not found",
+        message: "user_id và game_id là bắt buộc",
+      });
+    }
+
+    const updatedCart = await Cart.findOneAndUpdate(
+      { user_id },
+      { $pull: { items: { game_id } } },
+      { new: true }
+    );
+
+    if (!updatedCart) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Không tìm thấy giỏ hàng hoặc game_id",
       });
     }
 
     res.status(200).json({
       status: "OK",
-      message: "DeleteCart successfully!",
-      data: deleteCart,
+      message: "Xóa sản phẩm khỏi giỏ hàng thành công!",
+      data: updatedCart,
     });
   } catch (error) {
     return res.status(500).json({
-      message: "DeleteCart failed",
+      message: "Xóa sản phẩm thất bại",
       error: error.message,
     });
   }
